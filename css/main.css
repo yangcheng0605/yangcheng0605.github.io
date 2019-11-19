@@ -1943,7 +1943,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #e5bef6;
+  background: #9f8144;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -2812,6 +2812,7 @@ pre .javascript .function {
   margin-top: 300px;
   width: 240px;
   background: #eee;
+  background: transparent;
   box-shadow: none;
 }
 @media (min-width: 768px) and (max-width: 991px) {
@@ -2917,6 +2918,8 @@ pre .javascript .function {
   transition-duration: 0.2s;
   transition-timing-function: ease-in-out;
   transition-delay: 0s;
+  color: #555;
+  background: transparent;
 }
 .menu .menu-item a:hover,
 .menu-item-active a {

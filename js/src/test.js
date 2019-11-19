@@ -2,7 +2,7 @@
 console.log(1231231)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/sw.js', {scope: '/'})
+      navigator.serviceWorker.register('/js/src/sw.js', {scope: '/'})
           .then(function (registration) {
               console.log(1111)
               // 注册成功
