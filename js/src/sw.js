@@ -1,25 +1,49 @@
 // sw.js 文件
-
-// 安装
-self.addEventListener('install', function (e) {
-  // 缓存 App Shell 等关键静态资源和 html (保证能缓存的内容能在离线状态跑起来)
-  console.log(22222)
+// 监听 service worker 的 install 事件
+this.addEventListener('install', function (event) {
+  console.log('安装成功')
+  // 如果监听到了 service worker 已经安装成功的话，就会调用 event.waitUntil 回调函数
+  event.waitUntil(
+      // 安装成功后操作 CacheStorage 缓存，使用之前需要先通过 caches.open() 打开对应缓存空间。
+      caches.open('my-test-cache-v1').then(function (cache) {
+          // 通过 cache 缓存对象的 addAll 方法添加 precache 缓存
+          return cache.addAll([
+              '/',
+              '/js/src/test.js',
+              '/images/avatar.jpg',
+              '/images/bg.gif'
+          ]);
+      })
+  );
 });
-
-// 激活
-self.addEventListener('activate', function (e) {
-  // 激活的状态，这里就做一做老的缓存的清理工作
-});
-
-// 缓存请求和返回（这是个简单的缓存优先的例子）
-self.addEventListener('fetch', function (e) {
-  e.respondWith(caches.match(e.request)
-      .then(function (response) {
+//  fetch 的事件监听器 劫持HTTP 响应 
+this.addEventListener('fetch', function (event) {
+  console.log('fetch监听')
+  event.respondWith(
+      caches.match(event.request, {ignoreSearch: 'true' }).then(function (response) {
+        console.log(response)
+          // 来来来，代理可以搞一些代理的事情
+          // 如果 Service Worker 有自己的返回，就直接返回，减少一次 http 请求
           if (response) {
               return response;
           }
-          // fetchAndCache 方法并不存在，需要自己定义，这里只是示意代码
-          return fetchAndCache(e.request);
+          // 如果 service worker 没有返回，那就得直接请求真实远程服务
+          var request = event.request.clone(); // 把原始请求拷过来
+          return fetch(request).then(function (httpRes) {
+            console.log(httpRes)
+              // http请求的返回已被抓到，可以处置了。
+
+              // 请求失败了，直接返回失败的结果就好了。。
+              if (!httpRes || httpRes.status !== 200) {
+                  return httpRes;
+              }
+              // 请求成功的话，将请求缓存起来。
+              var responseClone = httpRes.clone();
+              caches.open('my-test-cache-v1').then(function (cache) {
+                  cache.put(event.request, responseClone);
+              });
+              return httpRes;
+          });
       })
   );
 });
